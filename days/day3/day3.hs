@@ -1,6 +1,7 @@
 import Data.Char (isUpperCase)
-import Data.List.Split (splitEvery)
-import Data.Set (fromList, toList)
+import Data.List (nub)
+import Data.List.Split (chunksOf)
+import GHC.OldList (intersect)
 
 puzzleInput :: IO String
 puzzleInput = readFile "/Users/burakguner/kod/advent-of-code-2022-hs/days/day3/input.txt"
@@ -8,19 +9,14 @@ puzzleInput = readFile "/Users/burakguner/kod/advent-of-code-2022-hs/days/day3/i
 splitHalf :: [a] -> ([a], [a])
 splitHalf list = splitAt ((length list + 1) `div` 2) list
 
-findPairs :: (Ord a) => [a] -> [a] -> [a]
-findPairs firstList secondList = removeDuplicates [x | x <- firstList, x `elem` secondList]
+findPairs :: (Eq a) => [a] -> [a] -> [a]
+findPairs firstList secondList = nub $ firstList `intersect` secondList
 
 findCommon :: (Eq a) => [a] -> [a] -> [a] -> a
-findCommon (x : xs) second third
-  | x `elem` second && x `elem` third = x
-  | otherwise = findCommon xs second third
+findCommon first second third = head $ first `intersect` second `intersect` third
 
 calculateGroup :: [String] -> Int
 calculateGroup [first, second, third] = calculatePoint $ findCommon first second third
-
-removeDuplicates :: (Ord a) => [a] -> [a]
-removeDuplicates = toList . fromList
 
 -- A = 27
 -- Unicode A = 65
@@ -44,4 +40,4 @@ main :: IO ()
 main = do
   input <- puzzleInput
   print . sum . map calculateLine $ lines input
-  print . sum . map calculateGroup $ splitEvery 3 $ lines input
+  print . sum . map calculateGroup . chunksOf 3 $ lines input
